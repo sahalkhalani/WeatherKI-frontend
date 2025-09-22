@@ -24,7 +24,7 @@ const generateTrivia = async () => {
   setLoading(true);
   try {
     console.log(`Selected Location: ${selectedLocation}`)
-    const result = await fetch('/api/weather/ai/trivia', { // Changed endpoint
+    const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/weather/ai/trivia`, { // Changed endpoint
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ location: selectedLocation })

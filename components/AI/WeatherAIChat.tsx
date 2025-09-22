@@ -11,7 +11,7 @@ const WeatherAIChat = ({ locations }: { locations: string[] }) => {
   
   setLoading(true);
   try {
-    const result = await fetch('/api/weather/ai/chat', { // Changed endpoint
+    const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/weather/ai/chat`, { // Changed endpoint
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question, locations })

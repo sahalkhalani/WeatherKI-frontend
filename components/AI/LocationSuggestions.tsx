@@ -11,7 +11,7 @@ const getSuggestions = async () => {
   
   setLoading(true);
   try {
-    const result = await fetch('/api/weather/ai/suggestions', { // Changed endpoint
+    const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/weather/ai/suggestions`, { // Changed endpoint
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentLocations, interests })
