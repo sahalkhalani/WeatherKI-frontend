@@ -1,3 +1,90 @@
+// import React, { useState, useEffect } from 'react';
+// import { Lightbulb } from 'lucide-react';
+
+// const WeatherTrivia = ({ locations }: { locations: string[] }) => {
+//   const [trivia, setTrivia] = useState('');
+//   const [loading, setLoading] = useState(false);
+//   const [selectedLocation, setSelectedLocation] = useState('');
+
+//  useEffect(() => {
+//     if (locations.length > 0) {
+//       if (!locations.includes(selectedLocation)) {
+//         setSelectedLocation(locations[0]);
+//         setTrivia(''); 
+//       }
+//     } else {
+//       setSelectedLocation('');
+//       setTrivia('');
+//     }
+//   }, [locations, selectedLocation]);
+
+// const generateTrivia = async () => {
+//   if (!selectedLocation) return;
+  
+//   setLoading(true);
+//   try {
+//     console.log(`Selected Location: ${selectedLocation}`)
+//     const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/weather/ai/trivia`, { // Changed endpoint
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ location: selectedLocation })
+//     });
+//     const data = await result.json();
+//     if (!result.ok) throw new Error(data.error);
+//     setTrivia(data.trivia || 'No trivia available');
+//   } catch (error) {
+//     setTrivia('Unable to generate weather trivia right now.');
+//   }
+//   setLoading(false);
+// };
+
+//   return (
+//     <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+//       <div className="flex items-center gap-2 mb-4">
+//         <Lightbulb className="w-5 h-5 text-white" />
+//         <h3 className="text-lg font-semibold text-white">Weather Trivia</h3>
+//       </div>
+      
+//       {locations.length === 0 ? (
+//         <p className="text-white/60 text-sm">Add weather widgets to get fun weather facts</p>
+//       ) : (
+//         <div className="space-y-3">
+//           <select
+//             value={selectedLocation}
+//             onChange={(e) => setSelectedLocation(e.target.value)}
+//             className="w-full p-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+//           >
+//             {locations.map(location => (
+//               <option key={location} value={location} className="bg-gray-800">
+//                 {location}
+//               </option>
+//             ))}
+//           </select>
+          
+//           <button
+//             onClick={generateTrivia}
+//             disabled={loading}
+//             className="w-full py-2 px-4 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200"
+//           >
+//             {loading ? 'Loading Facts...' : 'Get Fun Facts'}
+//           </button>
+          
+//           {trivia && (
+//             <div className="p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
+//               <p className="text-white text-sm leading-relaxed">
+//                 <span className="text-yellow-300">💡 Did you know?</span><br />
+//                 {trivia}
+//               </p>
+//             </div>
+//           )}
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default WeatherTrivia; 
+
 import React, { useState, useEffect } from 'react';
 import { Lightbulb } from 'lucide-react';
 
@@ -6,7 +93,7 @@ const WeatherTrivia = ({ locations }: { locations: string[] }) => {
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState('');
 
- useEffect(() => {
+  useEffect(() => {
     if (locations.length > 0) {
       if (!locations.includes(selectedLocation)) {
         setSelectedLocation(locations[0]);
@@ -18,25 +105,36 @@ const WeatherTrivia = ({ locations }: { locations: string[] }) => {
     }
   }, [locations, selectedLocation]);
 
-const generateTrivia = async () => {
-  if (!selectedLocation) return;
-  
-  setLoading(true);
-  try {
-    console.log(`Selected Location: ${selectedLocation}`)
-    const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/weather/ai/trivia`, { // Changed endpoint
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ location: selectedLocation })
-    });
-    const data = await result.json();
-    if (!result.ok) throw new Error(data.error);
-    setTrivia(data.trivia || 'No trivia available');
-  } catch (error) {
-    setTrivia('Unable to generate weather trivia right now.');
-  }
-  setLoading(false);
-};
+  const generateTrivia = async () => {
+    if (!selectedLocation) return;
+    
+    setLoading(true);
+    try {
+      console.log(`Selected Location: ${selectedLocation}`);
+      const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/weather/ai/trivia`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location: selectedLocation })
+      });
+      const data = await result.json();
+      if (!result.ok) throw new Error(data.error);
+      setTrivia(data.trivia || 'No trivia available');
+    } catch (error) {
+      setTrivia('Unable to generate weather trivia right now.');
+    }
+    setLoading(false);
+  };
+
+  // HELPER: Splits lines and strips out numbers, dashes, asterisks, and ANY stray bulb emojis
+  const parseTriviaPoints = (text: string): string[] => {
+    if (!text) return [];
+    return text
+      .split(/\n+/)
+      .map(point => point.replace(/^[-*•\s\d.💡]+/g, '').replace(/\*\*/g, '').trim())
+      .filter(point => point.length > 0 && !point.toLowerCase().includes('did you know'));
+  };
+
+  const triviaPoints = parseTriviaPoints(trivia);
 
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
@@ -49,6 +147,7 @@ const generateTrivia = async () => {
         <p className="text-white/60 text-sm">Add weather widgets to get fun weather facts</p>
       ) : (
         <div className="space-y-3">
+          {/* Restored original dropdown styling */}
           <select
             value={selectedLocation}
             onChange={(e) => setSelectedLocation(e.target.value)}
@@ -61,6 +160,7 @@ const generateTrivia = async () => {
             ))}
           </select>
           
+          {/* Restored original full-width button styling */}
           <button
             onClick={generateTrivia}
             disabled={loading}
@@ -69,12 +169,25 @@ const generateTrivia = async () => {
             {loading ? 'Loading Facts...' : 'Get Fun Facts'}
           </button>
           
+          {/* Restored original layout wrapper with fixed item mapping */}
           {trivia && (
             <div className="p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
-              <p className="text-white text-sm leading-relaxed">
-                <span className="text-yellow-300">💡 Did you know?</span><br />
-                {trivia}
-              </p>
+              <div className="text-white text-sm leading-relaxed">
+                <span className="text-yellow-300 block mb-2">💡 Did you know?</span>
+                
+                {triviaPoints.length > 0 ? (
+                  <ul className="space-y-3">
+                    {triviaPoints.map((point, index) => (
+                      <li key={index} className="text-white text-sm flex items-start gap-1">
+                        <span className="text-yellow-400 select-none font-bold">•</span>
+                        <span className="flex-1">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>{trivia}</p>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -83,4 +196,4 @@ const generateTrivia = async () => {
   );
 };
 
-export default WeatherTrivia; 
+export default WeatherTrivia;
